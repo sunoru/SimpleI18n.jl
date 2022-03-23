@@ -1,0 +1,13 @@
+name = "Internationalization"
+uuid = "e6e9dfa0-c7c8-478f-b0d1-9bf91bc25951"
+authors = ["Sunoru <s@sunoru.com>"]
+version = "0.1.0"
+
+[deps]
+MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
+
+[compat]
+julia = "1.6"
+MacroTools = "0.5"
+YAML = "0.4"
