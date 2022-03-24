@@ -43,7 +43,7 @@ Setup the i18n data for `module`. `fallback` can be one of the following (with e
     * A string: `"en"`
     * A list of strings: `["zh", "en"]`
     * A Dict{String, Vector{String}}: `Dict("zh" => ["zh-CN", "zh-TW"], "_" => ["en"])`
-    * A function from language code to a vector of language codes: `(lang) -> ["zh", "en"]`
+    * A function from language code to a vector of language codes: `(language) -> ["zh", "en"]`
 """
 function setup(
     current_module::Module,
