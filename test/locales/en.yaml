@@ -1,1 +1,4 @@
 hello-world: Hello world!
+nested:
+  nested2:
+    nested3: Some nested text

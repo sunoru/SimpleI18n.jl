@@ -1,4 +1,4 @@
-name = "Internationalization"
+name = "SimpleI18n"
 uuid = "e6e9dfa0-c7c8-478f-b0d1-9bf91bc25951"
 authors = ["Sunoru <s@sunoru.com>"]
 version = "0.1.0"

@@ -1,6 +1,6 @@
-# Internationalization.jl
+# SimpleI18n.jl
 
-Simple i18n in Julia.
+Simple Internationalization (I18n) in Julia.
 
 ## Usage
 

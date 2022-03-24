@@ -1,10 +1,5 @@
 import YAML
 
-function parse_locale_name(locale)
-    locale = split(locale, '.')[1]
-    locale = replace(locale, '-' => '_')
-    lowercase(locale)
-end
 
 parse_locale_data(data::String, _) = data
 parse_locale_data(data, locale_root) = I18nData(
@@ -15,66 +10,60 @@ parse_locale_data(data, locale_root) = I18nData(
     )
 )
 
-function load_locales_file(locales_file, locale_root = true)
-    data = YAML.load_file(locales_file)
+function load_locale_file(locale_file, locale_root = true)
+    data = YAML.load_file(locale_file)
     parse_locale_data(data, locale_root)
 end
 
-load_locales_dir(locales_dir) = I18nData(
+load_locale_dir(locale_dir) = I18nData(
     data = Dict(
         parse_locale_name(basename(file)) =>
-        load_locales_file(joinpath(locales_dir, file), false)
-        for file in readdir(locales_dir)
+        load_locale_file(joinpath(locale_dir, file), false)
+        for file in readdir(locale_dir)
     )
 )
 
+"""
+    link(src_module, dest_module)
 
-function setup_i18n(;
-    locale_name = get_system_language(),
-    locales_dir = nothing,
-    locales_file = nothing,
-    fallback = nothing,
-    set_global = true
-)
-    pctx = GLOBAL_I18N_CONTEXT[]
-    current_language = parse_locale_name(locale_name)
-    system_language = get_system_language()
-    fallback_rules = if isnothing(fallback)
-        set_global ? pctx.fallback_rules : default_fallback_rule
-    elseif fallback isa Dict
-        (lang) -> get(fallback, lang, system_language)
-    elseif fallback isa Function
-        fallback
-    elseif fallback isa AbstractString
-        fallback = string(fallback)
-        (_) -> [fallback]
-    else
-        default_fallback_rule
+Link the i18n data of `dest_module` to `src_module`.
+"""
+function link(src_module::Module, dest_module::Module)
+    ctx = get!(I18nContexts, dest_module) do
+        I18nContext()
     end
-    data = if !isnothing(locales_file)
-        load_locales_file(locales_file)
-    elseif !isnothing(locales_dir)
-        load_locales_dir(locales_dir)
-    elseif set_global
-        pctx.data
+    I18nContexts[src_module] = ctx
+end
+
+"""
+    setup([module=current_module], locale_file_or_dir, fallback)
+
+Setup the i18n data for `module`. `fallback` can be one of the following (with examples):
+
+    * A string: `"en"`
+    * A list of strings: `["zh", "en"]`
+    * A Dict{String, Vector{String}}: `Dict("zh" => ["zh-CN", "zh-TW"], "_" => ["en"])`
+    * A function from language code to a vector of language codes: `(lang) -> ["zh", "en"]`
+"""
+function setup(
+    current_module::Module,
+    locale_file_or_dir::AbstractString,
+    fallback
+)
+    data = if isdir(locale_file_or_dir)
+        load_locale_dir(locale_file_or_dir)
+    elseif isfile(locale_file_or_dir)
+        load_locale_file(locale_file_or_dir)
     else
+        @info "I18n file not found: $locale_file_or_dir"
         I18nData()
     end
     ctx = I18nContext(
-        current_language = current_language,
-        fallback_rules = fallback_rules,
-        data = data
+        data = data,
+        srcpath = locale_file_or_dir,
+        fallback = get_fallback_function(data, fallback)
     )
-    if set_global
-        GLOBAL_I18N_CONTEXT[] = ctx
-    end
-    ctx
+    I18nContexts[current_module] = ctx
 end
 
-setup_i18n(locale_name_or_file; kwargs...) = if isdir(locale_name_or_file)
-    setup_i18n(locales_dir = locale_name_or_file; kwargs...)
-elseif isfile(locale_name_or_file)
-    setup_i18n(locales_file = locale_name_or_file; kwargs...)
-else
-    setup_i18n(locale_name = locale_name_or_file; kwargs...)
-end
+@noinline setup(locale_file_or_dir, default_fallback) = setup(@caller_module(3), locale_file_or_dir, default_fallback)
