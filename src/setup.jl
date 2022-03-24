@@ -67,3 +67,14 @@ function setup(
 end
 
 @noinline setup(locale_file_or_dir, default_fallback) = setup(@caller_module(3), locale_file_or_dir, default_fallback)
+
+"""
+    on_language_changed(callback)
+
+`callback(language, previous_langauge)` will be called when the language is changed.
+"""
+function on_language_changed(callback)
+    callback(get_language(), "")
+    push!(OnLanguageChange, callback)
+    nothing
+end

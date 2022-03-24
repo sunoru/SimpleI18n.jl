@@ -6,9 +6,15 @@ module Foo
 
 using SimpleI18n
 
+const Font = Ref("font-1")
+
 function __init__()
     # Setup locale with one file containing data for all languages.
     SimpleI18n.setup(joinpath(@__DIR__, "../test/locales-2.yaml"), "en")
+    # We can change the font when locale is changed
+    SimpleI18n.on_language_changed() do value, previous
+        Font[] = startswith(value, "zh") ? "font-2" : "font-1"
+    end
     nothing
 end
 
@@ -47,8 +53,10 @@ end
 
     using .Foo
     @test Foo.f1() == "Hello, world!"
+    @test Foo.Font[] == "font-1"
     set_language("zh")
     @test Foo.f1() == "你好，世界！"
     @test Foo.f2() == "繁體中文"
+    @test Foo.Font[] == "font-2"
 
 end

@@ -4,9 +4,13 @@ function set_language(
     locale_name::AbstractString = get_system_language(),
     fallback::AbstractVector{<:AbstractString} = GlobalI18nConfig.fallback
 )
+    previous = GlobalI18nConfig.current_language
     locale_name = parse_locale_name(locale_name)
     GlobalI18nConfig.current_language = locale_name
     GlobalI18nConfig.fallback = parse_locale_name.(fallback)
+    for func in OnLanguageChange
+        func(locale_name, previous)
+    end
     nothing
 end
 set_language(locale_name, fallback::AbstractString) = set_language(locale_name, [fallback])

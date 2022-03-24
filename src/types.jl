@@ -20,3 +20,5 @@ end
 const GlobalI18nConfig = I18nConfig()
 
 const I18nContexts = Dict{Module, I18nContext}()
+
+const OnLanguageChange = Set{Function}()
