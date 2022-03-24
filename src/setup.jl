@@ -17,9 +17,10 @@ end
 
 load_locale_dir(locale_dir) = I18nData(
     data = Dict(
-        parse_locale_name(basename(file)) =>
+        parse_locale_name(splitext(file)[1]) =>
         load_locale_file(joinpath(locale_dir, file), false)
         for file in readdir(locale_dir)
+        if endswith(file, r".yaml|.yml"i)
     )
 )
 
