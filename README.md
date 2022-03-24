@@ -1,5 +1,7 @@
 # SimpleI18n.jl
 
+[![CI](https://github.com/sunoru/SimpleI18n.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/sunoru/SimpleI18n.jl/actions/workflows/ci.yml)
+
 Simple Internationalization (I18n) in Julia.
 
 ## Usage

@@ -840,7 +840,8 @@ function normalize_locale(locale)
     end
     lang_enc = langname
     if length(encoding) > 0
-        replace(encoding, '-' => "", '_' => "")
+        encoding = replace(encoding, '-' => "")
+        encoding = replace(encoding, '_' => "")
         lang_enc = string(lang_enc, ".", encoding)
     end
     lookup_name = if length(modifier) > 0

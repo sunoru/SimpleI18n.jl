@@ -23,7 +23,7 @@ f2() = i18n("ttt")
 
 end
 
-@testset "Internationalization.jl" begin
+@testset "SimpleI18n.jl" begin
     # Initial set-up with a folder containing locales.
     locales_dir = joinpath(@__DIR__, "locales")
     SimpleI18n.setup(locales_dir, "zh-Hans")
