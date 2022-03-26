@@ -70,12 +70,16 @@ end
 @noinline setup(locale_file_or_dir, default_fallback) = setup(@caller_module(3), locale_file_or_dir, default_fallback)
 
 """
-    on_language_changed(callback)
+    on_language_changed(callback, [config_or_context])
 
 `callback(language, previous_langauge)` will be called when the language is changed.
 """
-function on_language_changed(callback)
+function on_language_changed(callback, config::I18nConfig = GlobalI18nConfig)
     callback(get_language(), "")
-    push!(OnLanguageChange, callback)
-    nothing
+    callbacks = get!(OnLanguageChange, config) do
+        Set{Function}()
+    end
+    push!(callbacks, callback)
+    config
 end
+on_language_changed(callback, config::I18nContext) = on_language_changed(callback, get_config(config))

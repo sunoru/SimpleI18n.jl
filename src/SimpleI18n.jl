@@ -1,6 +1,7 @@
 module SimpleI18n
 
-export get_language, set_language, i18n, @i_str
+export get_language, set_language, set_language!,
+    i18n, @i_str
 
 include("utils.jl")
 include("locales.jl")

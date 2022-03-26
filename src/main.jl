@@ -1,19 +1,46 @@
-get_language() = GlobalI18nConfig.current_language
+get_language(config::I18nConfig = GlobalI18nConfig) = config.current_language
+get_language(ctx::I18nContext) = get_language(get_config(ctx))
 
-function set_language(
+function set_language!(
+    config::I18nConfig,
     locale_name::AbstractString = get_system_language(),
-    fallback::AbstractVector{<:AbstractString} = GlobalI18nConfig.fallback
+    fallback::Union{AbstractString, AbstractVector{<:AbstractString}} = GlobalI18nConfig.fallback
 )
-    previous = GlobalI18nConfig.current_language
+    if fallback isa AbstractString
+        fallback = [fallback]
+    end
+    previous = config.current_language
     locale_name = parse_locale_name(locale_name)
-    GlobalI18nConfig.current_language = locale_name
-    GlobalI18nConfig.fallback = parse_locale_name.(fallback)
-    for func in OnLanguageChange
+    config.current_language = locale_name
+    config.fallback = parse_locale_name.(fallback)
+    for func in get(OnLanguageChange, config, [])
         func(locale_name, previous)
     end
-    nothing
+    config
 end
-set_language(locale_name, fallback::AbstractString) = set_language(locale_name, [fallback])
+
+set_language(
+    locale_name::AbstractString = get_system_language(),
+    fallback::Union{AbstractString, AbstractVector{<:AbstractString}} = GlobalI18nConfig.fallback
+) = set_language!(GlobalI18nConfig, locale_name, fallback)
+
+function set_language!(
+    ctx::I18nContext,
+    locale_name::Union{AbstractString, Nothing} = nothing,
+    fallback::Union{AbstractString, AbstractVector{<:AbstractString}} = get_config(ctx).fallback
+)
+    config = get_config(ctx)
+    if isnothing(locale_name)
+        isnothing(config) && return ctx
+        ctx.override_config = nothing
+        pop!(OnLanguageChange, config, nothing)
+        return ctx
+    end
+    if isnothing(config)
+        config = ctx.config = I18nConfig()
+    end
+    set_language!(config, locale_name, fallback)
+end
 
 function get_entry(data::Union{I18nData, String}, path)
     for x in path
@@ -34,7 +61,7 @@ end
 
 function i18n(ctx::I18nContext, key, default = key; language = nothing)
     language = if isnothing(language)
-        GlobalI18nConfig.current_language
+        get_language(ctx)
     else
         parse_locale_name(language)
     end
@@ -51,7 +78,7 @@ function i18n(current_module::Module, key, default = key; language = nothing)
     i18n(ctx, key, default, language = language)
 end
 
-@noinline function i18n(key, default = key; language = nothing) 
+@noinline function i18n(key, default = key; language = nothing)
     current_module = @caller_module(5)
     i18n(current_module, key, default, language = language)
 end

@@ -14,11 +14,17 @@ end
 Base.@kwdef mutable struct I18nContext{T <: Function}
     data::I18nData = I18nData()
     srcpath::String = ""
+    override_config::Union{Nothing, I18nConfig} = nothing
     fallback::T
+end
+get_config(ctx::I18nContext) = if isnothing(ctx.override_config)
+    GlobalI18nConfig
+else
+    ctx.override_config
 end
 
 const GlobalI18nConfig = I18nConfig()
 
 const I18nContexts = Dict{Module, I18nContext}()
 
-const OnLanguageChange = Set{Function}()
+const OnLanguageChange = Dict{I18nConfig, Set{Function}}()
