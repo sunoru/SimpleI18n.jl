@@ -11,18 +11,24 @@ parse_locale_data(data, locale_root) = I18nData(
 )
 
 function load_locale_file(locale_file, locale_root = true)
-    data = YAML.load_file(locale_file)
-    parse_locale_data(data, locale_root)
+    if isfile(locale_file) && endswith(locale_file, r".yaml|.yml"i)
+        data = YAML.load_file(locale_file)
+        parse_locale_data(data, locale_root)
+    elseif isdir(locale_file)
+        dict = Dict{String, Union{I18nData, String}}()
+        for file in readdir(locale_file)
+            filename = splitext(file)[1]
+            filename = locale_root ? parse_locale_name(filename) : filename
+            data = load_locale_file(joinpath(locale_file, file), false)
+            if haskey(dict, filename)
+                merge!(dict[filename].data, data.data)
+            else
+                dict[filename] = data
+            end
+        end
+        I18nData(dict)
+    end
 end
-
-load_locale_dir(locale_dir) = I18nData(
-    data = Dict(
-        parse_locale_name(splitext(file)[1]) =>
-        load_locale_file(joinpath(locale_dir, file), false)
-        for file in readdir(locale_dir)
-        if endswith(file, r".yaml|.yml"i)
-    )
-)
 
 """
     link(src_module, dest_module)
@@ -51,13 +57,10 @@ function setup(
     locale_file_or_dir::AbstractString,
     fallback
 )
-    data = if isdir(locale_file_or_dir)
-        load_locale_dir(locale_file_or_dir)
-    elseif isfile(locale_file_or_dir)
-        load_locale_file(locale_file_or_dir)
-    else
-        @info "I18n file not found: $locale_file_or_dir"
-        I18nData()
+    data = load_locale_file(locale_file_or_dir)
+    if isnothing(data)
+        @warn "I18n file not found: $locale_file_or_dir"
+        data = I18nData()
     end
     ctx = I18nContext(
         data = data,
