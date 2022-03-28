@@ -54,7 +54,7 @@ function try_languages(ctx::I18nContext, path, languages)
     data = ctx.data
     for lang in languages
         haskey(data, lang) || continue
-        entry = get_entry(ctx.data[lang], path)
+        entry = get_entry(data[lang], path)
         isnothing(entry) || return entry
     end
 end

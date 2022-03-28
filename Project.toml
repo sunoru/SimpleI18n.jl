@@ -1,7 +1,7 @@
 name = "SimpleI18n"
 uuid = "e6e9dfa0-c7c8-478f-b0d1-9bf91bc25951"
 authors = ["Sunoru <s@sunoru.com>"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
