@@ -2,6 +2,7 @@ import YAML
 
 
 parse_locale_data(data::String, _) = data
+parse_locale_data(data::AbstractVector{String}, _) = join(data, '\n')
 parse_locale_data(data, locale_root) = I18nData(
     data = Dict(
         (locale_root ? parse_locale_name(key) : key) =>

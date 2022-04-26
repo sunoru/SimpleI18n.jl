@@ -1,1 +1,4 @@
 hello-world: Hello world!
+multi-lined:
+  - line1
+  - line2

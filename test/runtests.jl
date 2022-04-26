@@ -38,6 +38,7 @@ end
     # "en_US" will also use "en" automatically if not present
     set_language("en_US")
     @test i"hello-world" == "Hello world!"
+    @test i"multi-lined" == "line1\nline2"
 
     # Similarly, language codes such as "zh" will also use "zh-Hans".
     set_language("zh", "en")
